@@ -1,0 +1,3 @@
+[submodule "EPP-course-materials"]
+	path = EPP-course-materials
+	url = https://github.com/botanyse/EPP-course-materials.git
