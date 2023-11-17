@@ -11,14 +11,21 @@ bld = this_file_dir / "bld"
 def clean_and_reshape_nlsy_data(raw, info):
     pass
 
-def clean_year_data(raw, info):
+def clean_year_data(raw, year, info):
     df = pd.DataFrame(index=raw.index)
     df = _clean_bpi_variables(raw,info)
     for i in df.columns[:2]:
         df[i]= df[i].astype(pd.Int32Dtype()).astype(pd.CategoricalDtype())
     for i in df.columns[3:]:
         df[i] = _clean_bpi_cat(df[i])
-    return df
+    
+    df = pd.wide_to_long(df, stubnames= info.readable_name.unique(),i= 'childid invariant', j='year', sep= " ")
+    df = df.drop(columns=['childid','momid','birth_order'])
+    df.index.names = ['childid', 'year']
+    df = df.rename(columns= {'momid invariant': 'momid', 'birth_order invariant': 'birth_order'})
+    df = df.sort_index()
+    df = pd.concat([df, _add_subscale_scores(df)], axis=1)
+    return df.xs(year, level=1)
 
 def _clean_bpi_variables(raw_df, info_df):
      raw_df = raw_df[info_df["nlsy_name"]]  # choosing variables that are available in info 
@@ -31,12 +38,32 @@ def _clean_bpi_cat(sr):
     categories = ["not true", "sometimes true", "often true"]
     sr = sr.astype(pd.StringDtype()).str.lower().astype(pd.CategoricalDtype(categories=categories, ordered=True))
     return sr
+
+def _add_subscale_scores(df):
+    mapping_dict = {
+    'not true': 0,
+    'sometimes true': 1,
+    'often true': 1
+    }
+    subscale = df.copy()
+    for i in subscale.columns[2:]:
+        subscale[i] = subscale[i].map(mapping_dict)
     
+    categories = ["antisocial", "anxiety", "headstrong", "hyperactive", "dependence","peer"]
+
+    for i in categories:
+        subscale[i] = subscale[[col for col in subscale.columns if col.startswith(i)]].mean(axis=1)
+    
+    subscale = subscale[categories]
+
+    return subscale
+
+  
 if __name__ == "__main__":
     raw = pd.read_stata(bld / "BEHAVIOR_PROBLEMS_INDEX.dta")
     info = pd.read_csv(bld / "bpi_variable_info.csv")
-    clean_year_data(raw, info)
-    df = clean_year_data(raw,info)
+    
+    df = clean_year_data(raw,1998,info)
     df
    #  df.to_csv(bld / "clean_year_date.csv")
 
