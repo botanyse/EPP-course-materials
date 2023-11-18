@@ -9,7 +9,6 @@ this_file_dir = Path(__file__).parent
 bld = this_file_dir / "bld"
 
 def clean_and_reshape_nlsy_data(raw, info):
-
     cleaned_yearly_data = [clean_year_data(raw,i, info) for i in range(1986,2011,2)]
     return pd.concat(cleaned_yearly_data)
 
@@ -23,6 +22,7 @@ def clean_year_data(raw, year, info):
     df = _clean_bpi_variables(df,info)
     df["childid"] = _change_data_types(df["childid"])
     df["momid"] = _change_data_types(df["momid"])
+    df["birth_order"] = df["birth_order"].cat.codes
     df  = df.set_index(["childid","year"])
     for i in df.columns[2:]:
         df[i] = _clean_bpi_cat(df[i])
@@ -69,4 +69,4 @@ if __name__ == "__main__":
     raw = pd.read_stata(bld / "BEHAVIOR_PROBLEMS_INDEX.dta")
     info = pd.read_csv(bld / "bpi_variable_info.csv")
     df = clean_and_reshape_nlsy_data(raw,info)
-    df.to_csv(bld / "clean_nlsy_data.csv")
+    df.to_feather(bld / "clean_nlsy_data.arrow")
