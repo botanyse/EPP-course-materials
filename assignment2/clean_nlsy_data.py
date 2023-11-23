@@ -5,9 +5,6 @@ pd.options.mode.copy_on_write = True
 pd.options.future.infer_string = True
 pd.options.plotting.backend = "plotly"
 
-this_file_dir = Path(__file__).parent
-bld = this_file_dir / "bld"
-
 def clean_and_reshape_nlsy_data(raw, info):
     cleaned_yearly_data = [clean_year_data(raw,i, info) for i in range(1986,2011,2)]
     return pd.concat(cleaned_yearly_data)
@@ -20,18 +17,15 @@ def clean_year_data(raw, year, info):
     df[year_list] = raw[year_list]
     df['year'] = year
     df = _clean_bpi_variables(df,info)
-    df["childid"] = _change_data_types(df["childid"])
-    df["momid"] = _change_data_types(df["momid"])
+    df["childid"] = df["childid"].astype(pd.UInt32Dtype())
+    df["momid"] = df["momid"].astype(pd.UInt32Dtype())
     df["birth_order"] = df["birth_order"].cat.codes
     df  = df.set_index(["childid","year"])
     for i in df.columns[2:]:
         df[i] = _clean_bpi_cat(df[i])
     
-    df = pd.concat([df, _add_subscale_scores(df)], axis=1)
+    df = pd.concat([df, _add_subscale_scores(df, mapping_dict)], axis=1)
     return df.sort_index()
-
-def _change_data_types(sr):
-    return sr.astype(pd.UInt32Dtype())
 
 def _filter_by_year(raw_df,year,info):
     info_by_year = info.loc[info.survey_year == str(year)]
@@ -49,15 +43,10 @@ def _clean_bpi_cat(sr):
     sr = sr.astype(pd.StringDtype()).str.lower().astype(pd.CategoricalDtype(categories=categories, ordered=True))
     return sr
 
-def _add_subscale_scores(df):
-    mapping_dict = {
-    'not true': 0,
-    'sometimes true': 1,
-    'often true': 1
-    }
+def _add_subscale_scores(df ,dict):
     subscale = df.copy()
     for i in subscale.columns[2:]:
-        subscale[i] = subscale[i].map(mapping_dict)
+        subscale[i] = subscale[i].map(dict)
     
     categories = ["antisocial", "anxiety", "headstrong", "hyperactive", "dependence","peer"]
     for i in categories:
@@ -66,7 +55,16 @@ def _add_subscale_scores(df):
     return subscale
 
 if __name__ == "__main__":
+    this_file_dir = Path(__file__).parent
+    bld = this_file_dir / "bld"
     raw = pd.read_stata(bld / "BEHAVIOR_PROBLEMS_INDEX.dta")
     info = pd.read_csv(bld / "bpi_variable_info.csv")
+    
+    mapping_dict = {
+    'not true': 0,
+    'sometimes true': 1,
+    'often true': 1
+    }
+
     df = clean_and_reshape_nlsy_data(raw,info)
     df.to_feather(bld / "clean_nlsy_data.arrow")
