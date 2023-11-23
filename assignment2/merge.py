@@ -17,5 +17,5 @@ if __name__ == "__main__":
     clean_chs = pd.read_feather(bld / "clean_chs_data.arrow")
     clean_nlsy = pd.read_feather(bld / "clean_nlsy_data.arrow")
     merged_data = merge_df(clean_chs, clean_nlsy)
-    merged_data.to_feather(bld / "merged_data.arrow")
+    merged_data.to_csv(bld / "merged_data.csv")
     

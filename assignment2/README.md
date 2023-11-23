@@ -1,4 +1,3 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/78q9nXCM)
 # EPP Bonn 2023 - Assignment 2
 
 1. In the imperative way the DataFrame is changed in-place many times and variables of the same name changed their content. Describe why this is a problem, especially when working in a jupyter notebook.
