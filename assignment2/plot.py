@@ -25,4 +25,4 @@ if __name__ == "__main__":
     }
     for key,value in score_names.items():
         file_name = bld / key
-        create_plots(merged_data, key, value).write_image(file_name.with_suffix('.png'))
+        create_plots(merged_data, key, value).write_image(file_name.with_suffix('.png'), width=1080, height=720)
