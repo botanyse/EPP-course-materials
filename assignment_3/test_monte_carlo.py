@@ -67,7 +67,55 @@ def test_generate_measurement_error_changed_x0_value(inputs):
 
     assert not np.array_equal(x_with_error[:, 0], x_c[:, 0])
 
+@pytest.mark.xfail
+def test_input_negative_std_deviation_of_meas_error():
+    true_params = input["true_params"],
+    y_sd  = input["y_sd"],
+    cov_type = input["cov_type"],
+    mean = input["mean"],
+    meas_sds = np.array([-2, 3]),
+    n_repetitions = input["n_repetitions"],
+    seed = input["seed"],
+    n_obs = input["n_obs"],
+    do_monte_carlo(true_params, y_sd, cov_type, mean, meas_sds, n_repetitions,seed, n_obs)
 
+    with pytest.raises(ValueError) as excinfo:
+        do_monte_carlo(true_params, y_sd, cov_type, mean, meas_sds, n_repetitions,seed, n_obs)
+
+    assert "Standard deviation of measurement error cannot be negative." in str(excinfo.value)
+
+@pytest.mark.xfail
+def test_input_negative_y_std():
+    true_params = input["true_params"],
+    y_sd  = -input["y_sd"],
+    cov_type = input["cov_type"],
+    mean = input["mean"],
+    meas_sds = input["meas_sds"],
+    n_repetitions = input["n_repetitions"],
+    seed = input["seed"],
+    n_obs = input["n_obs"],
+
+    with pytest.raises(ValueError) as excinfo:
+        do_monte_carlo(true_params, y_sd, cov_type, mean, meas_sds, n_repetitions,seed, n_obs)
+
+    assert "Standard deviation of dependent variable y cannot be negative." in str(excinfo.value)
+
+
+@pytest.mark.xfail
+def test_input_string_parameter_vector():
+    true_params = np.array([1,1,1,"string",1,1])
+    y_sd  = input["y_sd"],
+    cov_type = input["cov_type"],
+    mean = input["mean"],
+    meas_sds = input["meas_sds"],
+    n_repetitions = input["n_repetitions"],
+    seed = input["seed"],
+    n_obs = input["n_obs"],
+    
+    with pytest.raises(TypeError) as excinfo:
+        do_monte_carlo(true_params, y_sd, cov_type, mean, meas_sds, n_repetitions,seed, n_obs)
+        
+    assert "Parameter cannot be a string." in str(excinfo.value)
 
     
                                                         
