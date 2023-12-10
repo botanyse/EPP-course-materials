@@ -30,6 +30,9 @@ def do_monte_carlo(true_params, y_sd, cov_type, mean, meas_sds, n_repetitions,se
         ValueError: If invalid cov_type input is given.
 
     """
+    _fail_if_parameters_not_numerical(true_params)
+    _fail_if_meas_sds_negative(meas_sds)
+    _fail_if_y_sd_negative(y_sd)
     rng = np.random.default_rng(seed)
     n_params = len(true_params)
     # Set up parameter names for plotting
@@ -141,3 +144,26 @@ def _generate_measurement_error(x, meas_sd,n_obs, rng):
     # Add measurement error
     x[:, 0] += meas_error
     return x
+
+
+def _fail_if_parameters_not_numerical(sr):
+    if np.any([isinstance(i,str) for i in sr]):
+        report = "Parameter cannot be a string."
+        raise TypeError(report)
+    
+def _fail_if_meas_sds_negative(sr):
+    if np.any(sr<0):
+        report = "Standard deviation of measurement error cannot be negative."
+        raise ValueError(report)
+    
+def _fail_if_y_sd_negative(sr):
+    if sr<0:
+        report = "Standard deviation of dependent variable y cannot be negative."
+        raise ValueError(report)
+
+
+
+
+
+
+
