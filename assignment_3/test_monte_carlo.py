@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from sklearn.linear_model import LinearRegression
-from monte_carlo import do_monte_carlo, _generate_cov_matrix, _generate_independent_and_dependent_variables, _generate_measurement_error, _create_data_frame_of_results
+from monte_carlo import do_monte_carlo, _generate_cov_matrix, _generate_independent_and_dependent_variables, _generate_measurement_error
 
 pd.options.mode.copy_on_write = True
 pd.options.future.infer_string = True
@@ -66,6 +66,56 @@ def test_generate_measurement_error_changed_x0_value(inputs):
     assert np.all(x_with_error[:, 1:] == x_c[:, 1:])
 
     assert not np.array_equal(x_with_error[:, 0], x_c[:, 0])
+
+# decorator to mark a test function as expected to fail
+# test will be executed but its failure will not be counted as an error
+# in the test run summary
+
+@pytest.mark.xfail
+def test_input_negative_std_deviation_of_meas_error():
+    true_params = input["true_params"],
+    y_sd  = input["y_sd"],
+    cov_type = input["cov_type"],
+    mean = input["mean"],
+    meas_sds = np.array([-2, 3]),
+    n_repetitions = input["n_repetitions"],
+    seed = input["seed"],
+    n_obs = input["n_obs"],
+    do_monte_carlo(true_params, y_sd, cov_type, mean, meas_sds, n_repetitions,seed, n_obs)
+
+@pytest.mark.xfail
+def test_input_negative_y_std():
+    true_params = input["true_params"],
+    y_sd  = -input["y_sd"],
+    cov_type = input["cov_type"],
+    mean = input["mean"],
+    meas_sds = input["meas_sds"],
+    n_repetitions = input["n_repetitions"],
+    seed = input["seed"],
+    n_obs = input["n_obs"],
+    do_monte_carlo(true_params, y_sd, cov_type, mean, meas_sds, n_repetitions,seed, n_obs)
+
+
+
+@pytest.mark.xfail
+def test_input_string_parameter_vector():
+    true_params = np.array([1,1,1,"string",1,1])
+    y_sd  = input["y_sd"],
+    cov_type = input["cov_type"],
+    mean = input["mean"],
+    meas_sds = input["meas_sds"],
+    n_repetitions = input["n_repetitions"],
+    seed = input["seed"],
+    n_obs = input["n_obs"],
+    do_monte_carlo(true_params, y_sd, cov_type, mean, meas_sds, n_repetitions,seed, n_obs)
+
+
+
+
+
+
+
+
 
 
 
