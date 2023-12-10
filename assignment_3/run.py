@@ -3,7 +3,6 @@ from monte_carlo import do_monte_carlo
 import numpy as np
 import pandas as pd
 import plotly.express as px
-from sklearn.linear_model import LinearRegression
 
 pd.options.mode.copy_on_write = True
 pd.options.future.infer_string = True
