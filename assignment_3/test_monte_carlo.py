@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from sklearn.linear_model import LinearRegression
-from monte_carlo import do_monte_carlo, _generate_cov_matrix, _generate_independent_and_dependent_variables, _generate_measurement_error, _create_data_frame_of_results
+from monte_carlo import do_monte_carlo, _generate_cov_matrix, _generate_independent_and_dependent_variables, _generate_measurement_error
 
 pd.options.mode.copy_on_write = True
 pd.options.future.infer_string = True
