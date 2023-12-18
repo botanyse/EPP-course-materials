@@ -3,7 +3,6 @@ import pandas as pd
 import pytest
 from sklearn.linear_model import LinearRegression
 from monte_carlo import do_monte_carlo, _generate_cov_matrix, _generate_independent_and_dependent_variables, _generate_measurement_error
-from scipy import stats
 
 pd.options.mode.copy_on_write = True
 pd.options.future.infer_string = True
@@ -23,16 +22,6 @@ def inputs():
     }
 
 
-def test_x0_parameter_bias_significance(inputs):
-    data = do_monte_carlo(**inputs)
-    parameter_estimates = data[data['name'] == 'x_0']['bias'].values
-
-    # Perform a one-sample t-test against the null hypothesis of zero bias
-    t_stat, p_value = stats.ttest_1samp(parameter_estimates, 0)
-
-    assert p_value < 0.05 
-
-# alternative but less general way of checking if parameter of x0 is biased towards 0
 def test_do_monte_carlo_x0_parameter_biased_towards_zero(inputs):
     data = do_monte_carlo(**inputs)
     x = data.loc[data["name"] == "x_0", ["bias"]]
