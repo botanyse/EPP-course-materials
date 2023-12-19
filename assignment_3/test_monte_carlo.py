@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from sklearn.linear_model import LinearRegression
+from scipy import stats
 from monte_carlo import do_monte_carlo, _generate_cov_matrix, _generate_independent_and_dependent_variables, _generate_measurement_error
 
 pd.options.mode.copy_on_write = True
@@ -29,6 +30,17 @@ def test_do_monte_carlo_x0_parameter_biased_towards_zero(inputs):
     actual =x.reset_index(drop=True).values
     expected = -np.ones_like(actual)
     np.testing.assert_array_almost_equal(np.round(actual),np.round(expected))
+
+# alternative way of checking attenuation bias
+
+def test_x0_parameter_bias_significance(inputs):
+    data = do_monte_carlo(**inputs)
+    parameter_estimates = data[data['name'] == 'x_0']['bias'].values
+
+    # Perform a one-sample t-test against the null hypothesis of zero bias
+    t_stat, p_value = stats.ttest_1samp(parameter_estimates, 0)
+
+    assert p_value < 0.05 
 
 
 def test_generate_cov_matrix_is_positive_semi_definite(inputs):

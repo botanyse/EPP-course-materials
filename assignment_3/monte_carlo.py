@@ -33,6 +33,12 @@ def do_monte_carlo(true_params, y_sd, cov_type, mean, meas_sds, n_repetitions,se
     _fail_if_parameters_not_numerical(true_params)
     _fail_if_meas_sds_negative(meas_sds)
     _fail_if_y_sd_negative(y_sd)
+    _fail_if_seed_not_hashable(seed)
+    _fail_if_cov_type_not_valid(cov_type)
+    _fail_if_n_non_positive(n_obs)
+    _fail_if_n_non_positive(n_repetitions)
+    _fail_if_mean_string(mean)
+    
     rng = np.random.default_rng(seed)
     n_params = len(true_params)
     # Set up parameter names for plotting
@@ -90,11 +96,7 @@ def _generate_cov_matrix(cov_type,n_params,rng):
             # always invertible
             helper = rng.uniform(low=-1, high=1, size=(n_params, n_params))
             cov = helper @ helper.T + np.eye(n_params)
-    else:
-        msg = f"Invalid cov_type: {cov_type}. Must be 'random' or 'deterministic.'"
-        raise ValueError(
-                msg,
-            )
+
     return cov
 
 def _generate_independent_and_dependent_variables(mean,cov,n_obs,y_sd,rng,true_params):
@@ -160,6 +162,34 @@ def _fail_if_y_sd_negative(sr):
     if sr<0:
         report = "Standard deviation of dependent variable y cannot be negative."
         raise ValueError(report)
+
+def _fail_if_seed_not_hashable(seed):
+    try: 
+        hash(seed)
+    except TypeError:
+        raise
+
+def _fail_if_cov_type_not_valid(str):
+    if not (str == 'deterministic' or str == 'random'):
+        report = f"Invalid cov_type: {str}. Must be 'random' or 'deterministic'"
+        raise ValueError(
+                report,
+            )
+
+def _fail_if_n_non_positive(obs):
+    if obs <= 0:
+        report = f'Invalid number of observations: {obs}. Must be a positive integer.'
+        raise ValueError(report)
+
+def _fail_if_mean_string(param):
+    if isinstance(param, str):
+        raise TypeError('Mean cannot be a string.')
+    
+
+
+
+    
+
 
 
 
